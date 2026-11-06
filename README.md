@@ -36,7 +36,7 @@ Autour de l'application, plusieurs services assurent la sécurité et la continu
 
 | Besoin | Service mis en place |
 | --- | --- |
-| **Administrer le serveur à distance** | OpenSSH, authentification par clé ED25519 uniquement |
+| **Administrer le serveur à distance** | OpenSSH, authentification par clé uniquement |
 | **Bloquer les attaques par force brute** | Fail2Ban, bannissement automatique via nftables |
 | **Gérer le parc et les incidents** | GLPI 11 sur une pile Apache 2 + PHP 8.4 + MariaDB 11.8 |
 | **Surveiller l'état du serveur** | Beszel (Hub + Agent) : CPU, mémoire, disque, réseau, services |
@@ -121,11 +121,11 @@ usermod -aG sudo user
 ### Génération et copie de la clé (poste Windows, PowerShell)
 
 ```powershell
-ssh-keygen -t ed25519
-type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh user@192.168.91.134 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+ssh-keygen
+type $env:USERPROFILE\.ssh\<nom_de_la_cle>.pub | ssh user@192.168.91.134 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 ```
 
-`ssh-keygen` crée une paire de clés : la **clé privée** reste sur le poste, la **clé publique** est ajoutée au fichier `authorized_keys` du serveur, avec les droits stricts exigés par SSH (`700` sur le dossier, `600` sur le fichier).
+`ssh-keygen` crée une paire de clés : la **clé privée** reste sur le poste et n'est jamais partagée, la **clé publique** est ajoutée au fichier `authorized_keys` du serveur, avec les droits stricts exigés par SSH (`700` sur le dossier, `600` sur le fichier).
 
 ![Copie de la clé publique](./Images/03-ssh-copie-cle-publique.png)
 
@@ -360,9 +360,13 @@ systemctl status beszel-agent --no-pager
 L'agent s'exécute sous un compte système dédié `beszel`, sans privilèges root.
 
 <p align="center">
-  <img src="./Images/23-beszel-compte-admin.png" width="34%" alt="Création du compte administrateur">
-  <img src="./Images/24-beszel-tableau-de-bord.png" width="64%" alt="Tableau de bord Beszel">
+  <img src="./Images/23-beszel-compte-admin.png" width="55%" alt="Création du compte administrateur">
+  <img src="./Images/24-beszel-ajout-systeme.png" width="40%" alt="Ajout du système (clé et token masqués)">
 </p>
+
+Une fois l'agent installé, le système apparaît en ligne dans le tableau de bord avec ses métriques en temps réel :
+
+![Tableau de bord Beszel](./Images/25-beszel-tableau-de-bord.png)
 
 ---
 
@@ -380,8 +384,8 @@ La sauvegarde repose sur quatre scripts Bash, chacun chargé d'une tâche, dispo
 
 ```
 backupGLPI.sh
-   ├── 1. dumpsql.sh   →  /tmp/AAAA.MM.JJ_HHhMM_glpi.sql
-   ├── 2. targz.sh     →  /root/backups/AAAA.MM.JJ_HHhMM_glpi.tar.gz
+   ├── 1. dumpsql.sh   →  /tmp/<date>_glpi.sql
+   ├── 2. targz.sh     →  /root/backups/<date>_glpi.tar.gz
    ├── 3. sendftp.sh   →  ftpupload.net:/backups/
    └── rotation locale (7 jours)
 ```
@@ -453,7 +457,7 @@ tail -20 /var/log/backupGLPI.log
 ### Restauration
 
 ```bash
-/root/scripts/restauration.sh /root/backups/AAAA.MM.JJ_HHhMM_glpi.tar.gz
+/root/scripts/restauration.sh /root/backups/<date>_glpi.tar.gz
 ```
 
 ---
@@ -474,7 +478,7 @@ tail -20 /var/log/backupGLPI.log
 
 | Mesure | Mise en œuvre |
 | --- | --- |
-| **Authentification forte** | Clé ED25519, mots de passe SSH désactivés |
+| **Authentification forte** | Authentification par clé, mots de passe SSH désactivés |
 | **Moindre privilège** | Root interdit en SSH, `sudo`, utilisateur MariaDB limité à sa base, agent Beszel non root |
 | **Défense contre le brute-force** | Fail2Ban + nftables |
 | **Cloisonnement de l'application** | Seul `/var/www/glpi/public` est exposé, configuration et données hors du web |

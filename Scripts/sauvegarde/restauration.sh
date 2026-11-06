@@ -1,7 +1,7 @@
 #!/bin/bash
 # =====================================================================
 #  restauration.sh - Restauration d'une sauvegarde GLPI
-#  Usage : ./restauration.sh /root/backups/AAAA.MM.JJ_HHhMM_glpi.tar.gz
+#  Usage : ./restauration.sh /root/backups/<date>_glpi.tar.gz
 # =====================================================================
 
 archive=$1
