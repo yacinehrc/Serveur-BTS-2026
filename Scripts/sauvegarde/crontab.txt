@@ -1,0 +1,4 @@
+# Crontab de root (crontab -e)
+# minute  heure  jour_du_mois  mois  jour_semaine  commande
+# Sauvegarde de GLPI chaque nuit à 3 h 00, journal dans /var/log/backupGLPI.log
+0 3 * * * /root/scripts/backupGLPI.sh >> /var/log/backupGLPI.log 2>&1

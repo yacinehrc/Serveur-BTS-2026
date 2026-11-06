@@ -1,0 +1,7 @@
+# Fins de ligne Unix pour les scripts et fichiers de configuration Linux
+*.sh    text eol=lf
+*.conf  text eol=lf
+*.local text eol=lf
+*.php   text eol=lf
+*.sql   text eol=lf
+*.txt   text eol=lf

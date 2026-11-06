@@ -1,0 +1,21 @@
+# /etc/fail2ban/jail.local
+# Protection du service SSH contre le brute-force
+
+[DEFAULT]
+# 3 échecs en 10 minutes => bannissement d'une heure
+bantime   = 1h
+findtime  = 10m
+maxretry  = 3
+# Debian 13 : lecture du journal systemd (plus de /var/log/auth.log)
+backend   = systemd
+# Blocage appliqué par le pare-feu nftables
+banaction = nftables-multiport
+# La machine locale n'est jamais bannie
+ignoreip  = 127.0.0.1/8 ::1
+
+[sshd]
+enabled = true
+port    = ssh
+# OpenSSH 10 journalise les échecs via le processus "sshd-session" :
+# on surveille donc l'ensemble du service ssh.service
+journalmatch = _SYSTEMD_UNIT=ssh.service
